@@ -5,7 +5,7 @@ install:
 	poetry install
 
 lint:
-	poetry run flake8 page_analyzer/app.py
+	poetry run flake8 page_analyzer
 
 PORT ?= 8000
 start:
