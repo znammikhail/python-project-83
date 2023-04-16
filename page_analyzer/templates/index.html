@@ -1,38 +1,22 @@
-<!DOCTYPE html>
-<html lang="ru">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Заголовок страницы</title>
-    <link rel="stylesheet" href="./styles/style.css">
-  </head>
-  <body>
-    <header>
-      <h1>Это мой сайт</h1>
-      <p>Он хороший</p>
-      <nav>
-        <ul>
-          <li><a href="index.html">Эта страница</a></li>
-          <li><a href="#">Другая страница</a></li>
-        </ul>
-      </nav>
-    </header>
-    <main>
-      <article>
-        <section>
-          <h2>Первая секция</h2>
-        </section>
-        <section>
-          <h2>Вторая секция</h2>
-        </section>
-        <section>
-          <h2>И третья</h2>
-        </section>
-      </article>
-    </main>
-    <footer>
-      <p>Сюда бы я вписал информацию об авторе и ссылки на другие сайты</p>
-    </footer>
-    <!-- сюда можно подключить jquery <script src="scripts/app.js" defer></script> -->
-  </body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+<hr>
+<main class="flex-grow-1">
+  <div class="container-lg mt-3">
+    <h1></h1>
+    <div class="row">
+      <div class="col-12 col-md-10 col-lg-8 mx-auto border rounded-3 bg-light p-5">
+        <h1 class="display-3">Анализатор страниц</h1>
+        <p class="lead">Бесплатно проверяйте сайты на SEO пригодность</p>
+        <form action="/urls " method="post" class="d-flex justify-content-center" required="">
+          <input type="text" name="url" placeholder="https://www.example.com" value=""
+            class="form-control form-control-lg">
+          <input type="submit" class="btn btn-primary  btn-lg ms-3 px-5 text-uppercase mx-3" value="Проверить">
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
