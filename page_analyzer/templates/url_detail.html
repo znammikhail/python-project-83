@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+    Анализатор страниц - {{ url[1] }}
+{% endblock %}
+
+{% block main %}
+<h1>Сайт: {{ url[1] }}</h1>
+<div class="table-responsive">
+    <table class="table table-bordered table-hover text-nowrap" data-test="url">
+        <tbody>
+            <tr>
+                <td>ID</td>
+                <td>{{ url[0]}}</td>
+            </tr>
+            <tr>
+                <td>Имя</td>
+                <td>{{ url[1] }}</td>
+            </tr>
+            <tr>
+                <td>Дата создания</td>
+                <td>{{ url[2] }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
