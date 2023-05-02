@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from dotenv import load_dotenv
 import os
 import validators
-from page_analyzer.db import get_urls, add_url_db, get_url_id, get_url_name
+from page_analyzer.db import get_urls, add_url_db, get_url_id, get_url_name, add_check_db, get_check_db
 
 
 load_dotenv()
@@ -48,10 +48,22 @@ def home():
 def url_detail(id):
     try:
         url = get_url_id(id)
+        url_id = id
         messages = get_flashed_messages(with_categories=True)
-        return render_template('url_detail.html', url=url, messages=messages)
+        checks = get_check_db(url_id)
+        return render_template('url_detail.html', url=url, checks=checks, messages=messages)
     except IndexError:
         return render_template('404.html'), 404
+
+
+@app.post('/urls/<id>/checks')
+def add_check(id):
+    url = get_url_id(id)
+    url_id = url[0]
+    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    add_check_db(url_id, created_at)
+    flash('Страница успешно проверена', 'alert-success')
+    return redirect(url_for('url_detail', id=url_id))
 
 
 @app.get('/urls')

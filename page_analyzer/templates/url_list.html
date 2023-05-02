@@ -20,7 +20,7 @@
             <tr>
                 <td>{{ url[0] }}</td>
                 <td><a href="{{ url_for('url_detail', id=url[0]) }}">{{ url[1] }}</a></td>
-                <td></td>
+                <td>{{ url[2] if url[2] is not none }}</td>
                 <td></td>
             </tr>
             {% endfor %}
