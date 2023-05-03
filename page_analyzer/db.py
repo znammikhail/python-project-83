@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 import psycopg2
-from psycopg2.extras import RealDictCursor
 import os
 
 
@@ -12,24 +11,39 @@ def create_connection():
     return psycopg2.connect(DATABASE_URL)
 
 
-def get_urls() -> dict:
-    # Создание соединения с базой данных PostgreSQL
+def get_urls():
+    """
+    Retrieve a list of URLs and their latest check status from the database.
+
+    Returns:
+        A list of tuples containing the
+        URL ID, name, last check timestamp, and status code.
+    """
     conn = create_connection()
-    # Создание курсора для работы с базой данных
     with conn.cursor() as cur:
-        # Выполнение SQL-запроса для получения всех URL адресов, отсортированных по дате создания в обратном порядке
-        cur.execute('''SELECT urls.id, urls.name, MAX(url_checks.created_at) AS last_check, url_checks.status_code
+        cur.execute('''SELECT urls.id,
+                        urls.name,
+                        MAX(url_checks.created_at) AS last_check,
+                        url_checks.status_code
                     FROM urls
                     LEFT JOIN url_checks ON urls.id = url_checks.url_id
                     GROUP BY urls.id, urls.name, url_checks.status_code
                     ''')
         urls = cur.fetchall()
-    # Закрытие курсора и соединения с базой данных
     conn.close()
     return urls
 
 
 def get_url_id(id):
+    """
+    Get a URL by its ID from the database.
+
+    Args:
+        id (int): The ID of the URL.
+
+    Returns:
+        tuple: A tuple representing the URL.
+    """
     conn = create_connection()
     with conn.cursor() as cur:
         cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
@@ -39,6 +53,15 @@ def get_url_id(id):
 
 
 def get_url_name(name):
+    """
+    Get a URL from the database by its name.
+
+    Args:
+        name (str): The name of the URL to retrieve.
+
+    Returns:
+        tuple: A tuple representing the URL's data in the database.
+    """
     conn = create_connection()
     with conn.cursor() as cur:
         cur.execute("SELECT * FROM urls WHERE name = %s", (name,))
@@ -48,6 +71,16 @@ def get_url_name(name):
 
 
 def add_url_db(url, created_at):
+    """
+    Adds a new URL to the database with the given name and creation date.
+
+    Args:
+        url (str): The name of the URL to add.
+        created_at (str): The creation date.
+
+    Returns:
+        None
+    """
     conn = create_connection()
     with conn.cursor() as cur:
         cur.execute(
@@ -58,22 +91,51 @@ def add_url_db(url, created_at):
     conn.close()
 
 
-def add_check_db(url_id, status_code, created_at):
+def add_check_db(url_id, status_code, h1, title, description, created_at):
+    """
+    Add a new URL check to the database.
+
+    Args:
+        url_id (int): ID of the URL being checked.
+        status_code (int): HTTP status code returned by the server.
+        h1 (str): The value of the first <h1> tag on the page.
+        title (str): The title of the page.
+        description (str): The meta description of the page.
+        created_at (str): Timestamp of when the check was performed.
+    """
     conn = create_connection()
     with conn.cursor() as cur:
         cur.execute(
-            "INSERT INTO url_checks (url_id,  status_code, created_at) VALUES (%s, %s, %s)",
-            (url_id, status_code, created_at),
+            '''INSERT INTO
+            url_checks (url_id,
+                        status_code,
+                        h1,
+                        title,
+                        description,
+                        created_at)
+            VALUES (%s, %s, %s, %s, %s, %s)''',
+            (url_id, status_code, h1, title, description, created_at),
         )
         conn.commit()
     conn.close()
 
 
 def get_check_db(url_id):
+    """
+    Retrieve a list of check results for a given URL from the database.
+
+    Args:
+        url_id (int): The ID of the URL to retrieve check results for.
+
+    Returns:
+        id, url_id, status_code, h1, title, description, created_at.
+    """
     conn = create_connection()
     with conn.cursor() as cur:
         cur.execute(
-            "SELECT * FROM url_checks WHERE url_id=(%s) ORDER BY id DESC", (url_id,))
+            '''SELECT * FROM url_checks
+            WHERE url_id=(%s) ORDER BY id DESC''',
+            (url_id,))
         url_list = cur.fetchall()
     conn.close()
     return url_list
