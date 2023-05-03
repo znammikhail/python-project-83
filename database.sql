@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS url_checks;
 DROP TABLE IF EXISTS urls;
 
 CREATE TABLE urls (
@@ -6,9 +7,6 @@ CREATE TABLE urls (
     created_at TIMESTAMP NOT NULL
 );
 
-id, url_id, status_code, h1, title, description, created_at
-
-DROP TABLE IF EXISTS url_checks;
 
 CREATE TABLE url_checks (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,

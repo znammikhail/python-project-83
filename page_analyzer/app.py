@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import os
 import validators
 from page_analyzer.db import get_urls, add_url_db, get_url_id, get_url_name, add_check_db, get_check_db
+import requests
 
 
 load_dotenv()
@@ -56,12 +57,18 @@ def url_detail(id):
         return render_template('404.html'), 404
 
 
-@app.post('/urls/<id>/checks')
+@app.post('/urls/<int:id>/checks')
 def add_check(id):
-    url = get_url_id(id)
-    url_id = url[0]
+    url = get_url_id(id)[1]
+    url_id = id
+    try:
+        response = requests.get(url)
+        status_code = response.status_code
+    except Exception:
+        flash('Произошла ошибка при проверке')
+        return redirect(url_for('url_detail', id=id))
     created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    add_check_db(url_id, created_at)
+    add_check_db(url_id=url_id, status_code=status_code, created_at=created_at)
     flash('Страница успешно проверена', 'alert-success')
     return redirect(url_for('url_detail', id=url_id))
 

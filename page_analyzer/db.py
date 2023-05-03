@@ -18,10 +18,11 @@ def get_urls() -> dict:
     # Создание курсора для работы с базой данных
     with conn.cursor() as cur:
         # Выполнение SQL-запроса для получения всех URL адресов, отсортированных по дате создания в обратном порядке
-        cur.execute('''SELECT urls.id, urls.name,
-                    MAX(url_checks.created_at) AS last_check
-                    FROM urls LEFT JOIN url_checks ON urls.id = url_checks.url_id 
-                    GROUP BY urls.id, urls.name;''')
+        cur.execute('''SELECT urls.id, urls.name, MAX(url_checks.created_at) AS last_check, url_checks.status_code
+                    FROM urls
+                    LEFT JOIN url_checks ON urls.id = url_checks.url_id
+                    GROUP BY urls.id, urls.name, url_checks.status_code
+                    ''')
         urls = cur.fetchall()
     # Закрытие курсора и соединения с базой данных
     conn.close()
@@ -57,12 +58,12 @@ def add_url_db(url, created_at):
     conn.close()
 
 
-def add_check_db(url_id, created_at):
+def add_check_db(url_id, status_code, created_at):
     conn = create_connection()
     with conn.cursor() as cur:
         cur.execute(
-            "INSERT INTO url_checks (url_id, created_at) VALUES (%s, %s)",
-            (url_id, created_at),
+            "INSERT INTO url_checks (url_id,  status_code, created_at) VALUES (%s, %s, %s)",
+            (url_id, status_code, created_at),
         )
         conn.commit()
     conn.close()
@@ -71,7 +72,8 @@ def add_check_db(url_id, created_at):
 def get_check_db(url_id):
     conn = create_connection()
     with conn.cursor() as cur:
-        cur.execute("SELECT * FROM url_checks WHERE url_id=(%s) ORDER BY id DESC", (url_id,))
+        cur.execute(
+            "SELECT * FROM url_checks WHERE url_id=(%s) ORDER BY id DESC", (url_id,))
         url_list = cur.fetchall()
     conn.close()
     return url_list
