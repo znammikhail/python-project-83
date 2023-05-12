@@ -143,7 +143,7 @@ def add_check(id):
             description = None
 
     except Exception:
-        flash('Произошла ошибка при проверке')
+        flash('Произошла ошибка при проверке', 'alert-danger')
         return redirect(url_for('url_detail', id=id))
 
     created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
