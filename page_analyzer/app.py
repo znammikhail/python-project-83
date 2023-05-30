@@ -125,9 +125,6 @@ def add_check(id):
     return redirect(url_for('url_detail', id=url_id))
 
 
-  
-
-
 @app.get('/urls')
 def url_list():
     """

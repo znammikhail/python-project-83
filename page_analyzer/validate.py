@@ -46,7 +46,7 @@ def validate_and_process_url(url) -> dict:
         url (str): The URL address to validate and process.
 
     Returns:
-        dict: A dictionary containing the validated and processed URL 
+        dict: A dictionary containing the validated and processed URL
         and any errors found.
 
     """
@@ -57,4 +57,3 @@ def validate_and_process_url(url) -> dict:
             validation_result['error'] = 'exists'
 
     return validation_result
-
