@@ -7,10 +7,8 @@ from flask import (
     redirect,
     url_for)
 from datetime import datetime
-from urllib.parse import urlparse
 from dotenv import load_dotenv
 import os
-import validators
 from page_analyzer.db import (
     get_urls,
     add_url_db,
@@ -20,7 +18,8 @@ from page_analyzer.db import (
     get_check_db
 )
 import requests
-from bs4 import BeautifulSoup
+from validate import validate_and_process_url
+from pars import parse_html_content
 
 load_dotenv()
 
@@ -35,34 +34,6 @@ def page_not_found(error):
     Return the 404.html template with a status code of 404.
     """
     return render_template('404.html'), 404
-
-
-def validate_url(url) -> dict:
-    """Validate the entered URL address.
-
-    Args:
-        url (str): The URL address to validate.
-
-    Returns:
-        dict: A dictionary containing the validated URL and any errors found.
-
-    """
-    mistake = None
-
-    if len(url) == 0:
-        mistake = 'empty'
-    elif len(url) > 255:
-        mistake = 'long length'
-    elif not validators.url(url):
-        mistake = 'invalid'
-    else:
-        url = urlparse(url)
-        url = f'{url.scheme}://{url.netloc}'
-        found = get_url_name(url)
-        if found:
-            mistake = 'exists'
-    answer = {'url': url, 'error': mistake}
-    return answer
 
 
 @app.route('/')
@@ -119,28 +90,25 @@ def add_check(id):
     url_id = id
     try:
         response = requests.get(url)
-        status_code = response.status_code
+        response.raise_for_status()  # Raise exception for HTTP error
 
         html = response.content
-        soup = BeautifulSoup(html, 'html.parser')
+        h1, title, description = parse_html_content(html)
 
-        h1_tag = soup.find('h1')
-        if h1_tag:
-            h1 = h1_tag.text.strip()
-        else:
-            h1 = None
+    except requests.exceptions.Timeout:
+        # Handle timeout error
+        flash('Произошла ошибка: превышено время ожидания', 'alert-danger')
+        return redirect(url_for('url_detail', id=id))
 
-        title_tag = soup.find('title')
-        if title_tag:
-            title = title_tag.text.strip()
-        else:
-            title = None
+    except requests.exceptions.ConnectionError:
+        # Handle connection error
+        flash('Произошла ошибка: ошибка подключения', 'alert-danger')
+        return redirect(url_for('url_detail', id=id))
 
-        meta_tag = soup.find('meta', attrs={'name': 'description'})
-        if meta_tag and 'content' in meta_tag.attrs:
-            description = meta_tag['content'].strip()
-        else:
-            description = None
+    except requests.exceptions.HTTPError:
+        # Handle HTTP error
+        flash('Произошла ошибка: недопустимый HTTP-ответ', 'alert-danger')
+        return redirect(url_for('url_detail', id=id))
 
     except Exception:
         flash('Произошла ошибка при проверке', 'alert-danger')
@@ -148,12 +116,16 @@ def add_check(id):
 
     created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     add_check_db(url_id=url_id,
-                 status_code=status_code,
-                 h1=h1, title=title,
+                 status_code=response.status_code,
+                 h1=h1,
+                 title=title,
                  description=description,
                  created_at=created_at)
     flash('Страница успешно проверена', 'alert-success')
     return redirect(url_for('url_detail', id=url_id))
+
+
+  
 
 
 @app.get('/urls')
@@ -179,7 +151,7 @@ def add_url():
         with an error message flashed.
     """
     url = request.form.get('url')
-    answer_valid = validate_url(url)
+    answer_valid = validate_and_process_url(url)
     url, error = answer_valid['url'], answer_valid['error']
 
     if error:
