@@ -28,8 +28,8 @@
   <li>Установите все необходимые зависимости, выполнив команду <code>make install</code>.</li>
   <li>Создайте файл <code>.env</code> в корневой папке проекта и добавьте в него следующие переменные:<br>
   ```bash
-    <code>DATABASE_URL = postgresql://{provider}://{user}:{password}@{host}:{port}/{db}</code><br>
-    <code>SECRET_KEY = '{your secret key}'</code>
+    DATABASE_URL = postgresql://{provider}://{user}:{password}@{host}:{port}/{db}
+    SECRET_KEY = '{your secret key}
   ```
   </li>
   <li>Запустите команды из файла <code>database.sql</code>, чтобы создать необходимые таблицы.</li>
