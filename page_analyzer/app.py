@@ -18,8 +18,8 @@ from page_analyzer.db import (
     get_check_db
 )
 import requests
-from validate import validate_and_process_url
-from pars import parse_html_content
+from page_analyzer.validate import validate_and_process_url
+from page_analyzer.pars import parse_html_content
 
 load_dotenv()
 
