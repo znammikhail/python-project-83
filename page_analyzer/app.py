@@ -97,17 +97,17 @@ def add_check(id):
 
     except requests.exceptions.Timeout:
         # Handle timeout error
-        flash('Произошла ошибка: превышено время ожидания', 'alert-danger')
+        flash('Произошла ошибка при проверке', 'alert-danger')
         return redirect(url_for('url_detail', id=id))
 
     except requests.exceptions.ConnectionError:
         # Handle connection error
-        flash('Произошла ошибка: ошибка подключения', 'alert-danger')
+        flash('Произошла ошибка при проверке', 'alert-danger')
         return redirect(url_for('url_detail', id=id))
 
     except requests.exceptions.HTTPError:
         # Handle HTTP error
-        flash('Произошла ошибка: недопустимый HTTP-ответ', 'alert-danger')
+        flash('Произошла ошибка при проверке', 'alert-danger')
         return redirect(url_for('url_detail', id=id))
 
     except Exception:

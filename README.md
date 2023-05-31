@@ -27,7 +27,7 @@
   <li>В командной строке перейдите в папку с проектом (<code>python-project-83</code>).</li>
   <li>Установите все необходимые зависимости, выполнив команду <code>make install</code>.</li>
   <li>Создайте файл <code>.env</code> в корневой папке проекта и добавьте в него следующие переменные:<br>
-  ```bash
+  ```
     DATABASE_URL = postgresql://{provider}://{user}:{password}@{host}:{port}/{db}
     SECRET_KEY = '{your secret key}
   ```
