@@ -27,10 +27,10 @@
   <li>В командной строке перейдите в папку с проектом (<code>python-project-83</code>).</li>
   <li>Установите все необходимые зависимости, выполнив команду <code>make install</code>.</li>
   <li>Создайте файл <code>.env</code> в корневой папке проекта и добавьте в него следующие переменные:<br>
-  ```
-    DATABASE_URL = postgresql://{provider}://{user}:{password}@{host}:{port}/{db}
-    SECRET_KEY = '{your secret key}
-  ```
+
+> DATABASE_URL = postgresql://{provider}://{user}:{password}@{host}:{port}/{db}
+> SECRET_KEY = '{your secret key}
+
   </li>
   <li>Запустите команды из файла <code>database.sql</code>, чтобы создать необходимые таблицы.</li>
 </ol>

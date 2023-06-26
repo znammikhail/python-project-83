@@ -34,7 +34,7 @@ def get_urls():
     return urls
 
 
-def get_url_id(id):
+def get_url_by_id(id):
     """
     Get a URL by its ID from the database.
 
@@ -42,17 +42,19 @@ def get_url_id(id):
         id (int): The ID of the URL.
 
     Returns:
-        tuple: A tuple representing the URL.
+        Returns:
+        dict:   - 'id': The ID of the URL.
+                - 'name': The name of the URL.
     """
     conn = create_connection()
     with conn.cursor() as cur:
         cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
         url = cur.fetchone()
     conn.close()
-    return url
+    return {'id': url[0], 'name': url[1], 'created_at': url[2]}
 
 
-def get_url_name(name):
+def get_url_by_name(name):
     """
     Get a URL from the database by its name.
 
@@ -60,17 +62,18 @@ def get_url_name(name):
         name (str): The name of the URL to retrieve.
 
     Returns:
-        tuple: A tuple representing the URL's data in the database.
+        dict:   - 'id': The ID of the URL.
+                - 'name': The name of the URL.
     """
     conn = create_connection()
     with conn.cursor() as cur:
         cur.execute("SELECT * FROM urls WHERE name = %s", (name,))
         url = cur.fetchone()
     conn.close()
-    return url
+    return {'id': url[0], 'name': url[1], 'created_at': url[2]}
 
 
-def add_url_db(url, created_at):
+def add_url_in_db(url, created_at):
     """
     Adds a new URL to the database with the given name and creation date.
 
@@ -79,7 +82,7 @@ def add_url_db(url, created_at):
         created_at (str): The creation date.
 
     Returns:
-        None
+        None.
     """
     conn = create_connection()
     with conn.cursor() as cur:
@@ -91,7 +94,7 @@ def add_url_db(url, created_at):
     conn.close()
 
 
-def add_check_db(url_id, status_code, h1, title, description, created_at):
+def add_check_in_db(url_id, status_code, h1, title, description, created_at):
     """
     Add a new URL check to the database.
 
@@ -120,7 +123,7 @@ def add_check_db(url_id, status_code, h1, title, description, created_at):
     conn.close()
 
 
-def get_check_db(url_id):
+def get_check(url_id):
     """
     Retrieve a list of check results for a given URL from the database.
 

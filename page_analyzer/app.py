@@ -11,14 +11,14 @@ from dotenv import load_dotenv
 import os
 from page_analyzer.db import (
     get_urls,
-    add_url_db,
-    get_url_id,
-    get_url_name,
-    add_check_db,
-    get_check_db
+    add_url_in_db,
+    get_url_by_id,
+    get_url_by_name,
+    add_check_in_db,
+    get_check
 )
 import requests
-from page_analyzer.validate import validate_and_process_url
+from page_analyzer.validate import validate_url, standardize_url, is_url_exists
 from page_analyzer.pars import parse_html_content
 
 load_dotenv()
@@ -60,10 +60,9 @@ def url_detail(id):
         IndexError: if the ID is not found.
     """
     try:
-        url = get_url_id(id)
-        url_id = id
+        url = get_url_by_id(id)
         messages = get_flashed_messages(with_categories=True)
-        checks = get_check_db(url_id)
+        checks = get_check(id)
         return render_template('url_detail.html',
                                url=url, checks=checks,
                                messages=messages)
@@ -86,41 +85,30 @@ def add_check(id):
         Exception: If an error occurs during the check.
 
     """
-    url = get_url_id(id)[1]
+    url = get_url_by_id(id)['name']
     url_id = id
     try:
         response = requests.get(url)
-        response.raise_for_status()  # Raise exception for HTTP error
+        response.raise_for_status()
 
         html = response.content
         h1, title, description = parse_html_content(html)
 
-    except requests.exceptions.Timeout:
-        # Handle timeout error
-        flash('Произошла ошибка при проверке', 'alert-danger')
+    except requests.exceptions.RequestException:
+        flash('Произошла ошибка: недопустимый HTTP-ответ', 'alert-danger')
         return redirect(url_for('url_detail', id=id))
 
-    except requests.exceptions.ConnectionError:
-        # Handle connection error
-        flash('Произошла ошибка при проверке', 'alert-danger')
-        return redirect(url_for('url_detail', id=id))
-
-    except requests.exceptions.HTTPError:
-        # Handle HTTP error
-        flash('Произошла ошибка при проверке', 'alert-danger')
-        return redirect(url_for('url_detail', id=id))
-
-    except Exception:
+    except (ValueError, TypeError):
         flash('Произошла ошибка при проверке', 'alert-danger')
         return redirect(url_for('url_detail', id=id))
 
     created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    add_check_db(url_id=url_id,
-                 status_code=response.status_code,
-                 h1=h1,
-                 title=title,
-                 description=description,
-                 created_at=created_at)
+    add_check_in_db(url_id=url_id,
+                    status_code=response.status_code,
+                    h1=h1,
+                    title=title,
+                    description=description,
+                    created_at=created_at)
     flash('Страница успешно проверена', 'alert-success')
     return redirect(url_for('url_detail', id=url_id))
 
@@ -148,32 +136,32 @@ def add_url():
         with an error message flashed.
     """
     url = request.form.get('url')
-    answer_valid = validate_and_process_url(url)
-    url, error = answer_valid['url'], answer_valid['error']
+    validation_result = validate_url(url)
 
-    if error:
-        if error == 'exists':
-            id = get_url_name(url)[0]
+    if validation_result.error is None:
+        standardized_url = standardize_url(url)
+        if is_url_exists(standardized_url):
             flash('Страница уже существует', 'alert-info')
+            id = get_url_by_name(standardized_url)['id']
             return redirect(url_for('url_detail', id=id))
-        else:
-            flash('Некорректный URL', 'alert-danger')
-            if error == 'empty':
-                flash('URL обязателен', 'alert-danger')
-            elif error == 'long length':
-                flash('URL превышает 255 символов', 'alert-danger')
-            messages = get_flashed_messages(with_categories=True)
-            return render_template('index.html', url=url, messages=messages)
 
-    else:
         data = {
-            'url': url,
+            'url': standardized_url,
             'created_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
-        add_url_db(data['url'], data['created_at'])
-        id = get_url_name(url)[0]
+        add_url_in_db(data['url'], data['created_at'])
+        id = get_url_by_name(standardized_url)['id']
         flash('Страница успешно добавлена', 'alert-success')
         return redirect(url_for('url_detail', id=id))
+
+    else:
+        flash('Некорректный URL', 'alert-danger')
+        if validation_result.error == 'URL is empty':
+            flash('URL обязателен', 'alert-danger')
+        elif validation_result.error == 'URL exceeds maximum length':
+            flash('URL превышает 255 символов', 'alert-danger')
+        messages = get_flashed_messages(with_categories=True)
+        return render_template('index.html', url=url, messages=messages)
 
 
 if __name__ == '__main__':
