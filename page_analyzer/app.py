@@ -140,6 +140,12 @@ def add_url():
     standardized_url = standardize_url(url)
 
     if validation_result['error'] is not None \
+            and validation_result['error'] == 'URL is invalid':
+        flash('Некорректный URL', 'alert-danger')
+        messages = get_flashed_messages(with_categories=True)
+        return render_template('index.html', url=url, messages=messages), 422
+
+    elif validation_result['error'] is not None \
             and validation_result['error'] == 'URL is empty':
         flash('Некорректный URL', 'alert-danger')
         flash('URL обязателен', 'alert-danger')
@@ -169,6 +175,10 @@ def add_url():
         id = get_url_by_name(standardized_url)['id']
         flash('Страница успешно добавлена', 'alert-success')
         return redirect(url_for('url_detail', id=id))
+
+    flash('Некорректный URL', 'alert-danger')
+    messages = get_flashed_messages(with_categories=True)
+    return render_template('index.html', url=url, messages=messages), 500
 
 
 if __name__ == '__main__':
