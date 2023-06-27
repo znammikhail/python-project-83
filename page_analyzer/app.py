@@ -166,3 +166,6 @@ def add_url():
 
 if __name__ == '__main__':
     app.run()
+
+# Не проходит test_success с этим сайтом http://stub.com/.
+# С остальными работает
