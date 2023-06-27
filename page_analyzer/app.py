@@ -167,12 +167,12 @@ def add_url():
         add_url_to_db(data['url'], data['created_at'])
         id = get_url_by_name(standardized_url)['id']
         flash('Страница успешно добавлена', 'alert-success')
-        return redirect(url_for('url_detail', id=id))    
+        return redirect(url_for('url_detail', id=id))
 
 
 if __name__ == '__main__':
     app.run()
 
-# Не проходит test_success с этим сайтом http://stub.com/.
+# Не проходит только один test_success с этим сайтом http://stub.com/.
 # Не удается получить get запрос.
-# С остальными сайтами работает.
+# С остальными сайтами работает, все проверил.
