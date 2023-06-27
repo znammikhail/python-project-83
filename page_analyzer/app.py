@@ -151,6 +151,7 @@ def add_url():
         flash('Некорректный URL', 'alert-danger')
         flash('URL превышает 255 символов', 'alert-danger')
         messages = get_flashed_messages(with_categories=True)
+        return render_template('index.html', url=url, messages=messages), 422
 
     elif validation_result['error'] is None \
             and is_url_exists(standardized_url):
