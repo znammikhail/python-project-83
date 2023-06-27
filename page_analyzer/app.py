@@ -95,7 +95,7 @@ def add_check(id):
         h1, title, description = parse_html_content(html)
 
     except requests.exceptions.RequestException:
-        flash('Произошла ошибка: недопустимый HTTP-ответ', 'alert-danger')
+        flash('Произошла ошибка при проверке', 'alert-danger')
         return redirect(url_for('url_detail', id=id))
 
     except (ValueError, TypeError):
@@ -161,7 +161,7 @@ def add_url():
         elif validation_result['error'] == 'URL exceeds maximum length':
             flash('URL превышает 255 символов', 'alert-danger')
         messages = get_flashed_messages(with_categories=True)
-        return render_template('index.html', url=url, messages=messages)
+        return render_template('index.html', url=url, messages=messages), 422
 
 
 if __name__ == '__main__':
