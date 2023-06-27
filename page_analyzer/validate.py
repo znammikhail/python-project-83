@@ -3,13 +3,7 @@ import validators
 from page_analyzer.db import get_url_by_name
 
 
-class ValidationResult:
-    def __init__(self, url, error=None):
-        self.url = url
-        self.error = error
-
-
-def validate_url(url) -> ValidationResult:
+def validate_url(url) -> dict:
     """Validate the entered URL address.
 
     Args:
@@ -20,13 +14,13 @@ def validate_url(url) -> ValidationResult:
 
     """
     if len(url) == 0:
-        return ValidationResult(url, error='URL is empty')
+        return {'url': url, 'error': 'URL is empty'}
     elif len(url) > 255:
-        return ValidationResult(url, error='URL exceeds maximum length')
+        return {'url': url, 'error': 'URL exceeds maximum length'}
     elif not validators.url(url):
-        return ValidationResult(url, error='URL is invalid')
+        return {'url': url, 'error': 'URL is invalid'}
 
-    return ValidationResult(url, error=None)
+    return {'url': url, 'error': None}
 
 
 def standardize_url(url):

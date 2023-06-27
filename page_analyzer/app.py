@@ -11,10 +11,10 @@ from dotenv import load_dotenv
 import os
 from page_analyzer.db import (
     get_urls,
-    add_url_in_db,
+    add_url_to_db,
     get_url_by_id,
     get_url_by_name,
-    add_check_in_db,
+    add_check_to_db,
     get_check
 )
 import requests
@@ -103,7 +103,7 @@ def add_check(id):
         return redirect(url_for('url_detail', id=id))
 
     created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    add_check_in_db(url_id=url_id,
+    add_check_to_db(url_id=url_id,
                     status_code=response.status_code,
                     h1=h1,
                     title=title,
@@ -137,28 +137,28 @@ def add_url():
     """
     url = request.form.get('url')
     validation_result = validate_url(url)
-
-    if validation_result.error is None:
+    if validation_result['error'] is None:
         standardized_url = standardize_url(url)
         if is_url_exists(standardized_url):
             flash('Страница уже существует', 'alert-info')
             id = get_url_by_name(standardized_url)['id']
             return redirect(url_for('url_detail', id=id))
 
-        data = {
-            'url': standardized_url,
-            'created_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
-        add_url_in_db(data['url'], data['created_at'])
-        id = get_url_by_name(standardized_url)['id']
-        flash('Страница успешно добавлена', 'alert-success')
-        return redirect(url_for('url_detail', id=id))
+        else:
+            data = {
+                'url': standardized_url,
+                'created_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            add_url_to_db(data['url'], data['created_at'])
+            id = get_url_by_name(standardized_url)['id']
+            flash('Страница успешно добавлена', 'alert-success')
+            return redirect(url_for('url_detail', id=id))
 
     else:
         flash('Некорректный URL', 'alert-danger')
-        if validation_result.error == 'URL is empty':
+        if validation_result['error'] == 'URL is empty':
             flash('URL обязателен', 'alert-danger')
-        elif validation_result.error == 'URL exceeds maximum length':
+        elif validation_result['error'] == 'URL exceeds maximum length':
             flash('URL превышает 255 символов', 'alert-danger')
         messages = get_flashed_messages(with_categories=True)
         return render_template('index.html', url=url, messages=messages)

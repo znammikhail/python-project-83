@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import psycopg2
 import os
+from psycopg2.extras import RealDictCursor
 
 
 load_dotenv()
@@ -34,7 +35,7 @@ def get_urls():
     return urls
 
 
-def get_url_by_id(id):
+def get_url_by_id(id) -> dict:
     """
     Get a URL by its ID from the database.
 
@@ -47,14 +48,14 @@ def get_url_by_id(id):
                 - 'name': The name of the URL.
     """
     conn = create_connection()
-    with conn.cursor() as cur:
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
         url = cur.fetchone()
     conn.close()
-    return {'id': url[0], 'name': url[1], 'created_at': url[2]}
+    return url
 
 
-def get_url_by_name(name):
+def get_url_by_name(name) -> dict:
     """
     Get a URL from the database by its name.
 
@@ -66,14 +67,14 @@ def get_url_by_name(name):
                 - 'name': The name of the URL.
     """
     conn = create_connection()
-    with conn.cursor() as cur:
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute("SELECT * FROM urls WHERE name = %s", (name,))
         url = cur.fetchone()
     conn.close()
-    return {'id': url[0], 'name': url[1], 'created_at': url[2]}
+    return url
 
 
-def add_url_in_db(url, created_at):
+def add_url_to_db(url, created_at):
     """
     Adds a new URL to the database with the given name and creation date.
 
@@ -94,7 +95,7 @@ def add_url_in_db(url, created_at):
     conn.close()
 
 
-def add_check_in_db(url_id, status_code, h1, title, description, created_at):
+def add_check_to_db(url_id, status_code, h1, title, description, created_at):
     """
     Add a new URL check to the database.
 
