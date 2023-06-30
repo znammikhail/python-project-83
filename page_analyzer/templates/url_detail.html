@@ -34,7 +34,6 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>URL_ID</th>
                 <th>Код ответа</th>
                 <th>h1</th>
                 <th>title</th>
@@ -47,7 +46,6 @@
             {% for check in checks %}
             <tr>
                 <td>{{check[0]}}</td>
-                <td>{{check[1]}}</td>
                 <td>{{check[2] if check[2] is not none}}</td>
                 <td>{{check[3] if check[3] is not none}}</td>
                 <td>{{check[4] if check[4] is not none}}</td>
